@@ -6,7 +6,18 @@
 #include <exception>
 #include <algorithm>
 
-class Heap_exception : public std::exception {
+class EmptyException : public std::exception {
+public:
+    [[nodiscard]] const char *what() const noexcept override {
+        return "The heap is empty.";
+    }
+};
+
+class IndexException : public std::exception {
+public:
+    [[nodiscard]] const char *what() const noexcept override {
+        return "The index is out of range.";
+    }
 };
 
 template<typename T, bool (*comp)(T, T)>
@@ -77,7 +88,7 @@ public:
 
 template<typename T, bool (*comp)(T, T)>
 void Heap<T, comp>::swap(size_t index_1, size_t index_2) {
-    if (index_1 >= size() || index_2 >= size()) throw Heap_exception();
+    if (index_1 >= size() || index_2 >= size()) throw IndexException();
 
     T *aux = data[index_1];
     data[index_1] = data[index_2];
@@ -86,7 +97,7 @@ void Heap<T, comp>::swap(size_t index_1, size_t index_2) {
 
 template<typename T, bool (*comp)(T, T)>
 void Heap<T, comp>::upheap(size_t inserted_index, size_t parent_index) {
-    if (inserted_index >= size() || parent_index >= size()) throw Heap_exception();
+    if (inserted_index >= size() || parent_index >= size()) throw IndexException();
 
     if (comp(*data[inserted_index], *data[parent_index])) {
         swap(inserted_index, parent_index);
@@ -99,7 +110,7 @@ void Heap<T, comp>::upheap(size_t inserted_index, size_t parent_index) {
 
 template<typename T, bool (*comp)(T, T)>
 void Heap<T, comp>::downheap(size_t moved_index) {
-    if (moved_index >= size()) throw Heap_exception();
+    if (moved_index >= size()) throw IndexException();
 
     size_t swap_index = moved_index;
 
@@ -151,13 +162,13 @@ void Heap<T, comp>::add(T new_element) {
     data.push_back(new T(new_element));
 
     if (size() - 1 > FIRST_ELEMENT) {
-        upheap(size() - 1, (size() - PARENT_ADDITIVE_FACTOR) / PARENT_MULTIPLICATIVE_FACTOR);
+        upheap(size() - 1, (size() - 1 - PARENT_ADDITIVE_FACTOR) / PARENT_MULTIPLICATIVE_FACTOR);
     }
 }
 
 template<typename T, bool (*comp)(T, T)>
 T Heap<T, comp>::remove() {
-    if (empty()) throw Heap_exception();
+    if (empty()) throw EmptyException();
 
     T removed_element = *data[FIRST_ELEMENT];
     delete data[FIRST_ELEMENT];
@@ -173,18 +184,18 @@ T Heap<T, comp>::remove() {
 
 template<typename T, bool (*comp)(T, T)>
 T Heap<T, comp>::first() {
-    if (empty()) throw Heap_exception();
+    if (empty()) throw EmptyException();
 
     return *data[FIRST_ELEMENT];
 }
 
 template<typename T, bool (*comp)(T, T)>
 T Heap<T, comp>::last() {
-    if (empty()) throw Heap_exception();
+    if (empty()) throw EmptyException();
 
     T last_element = *data[size() / LEAFS_MULTIPLICATIVE_FACTOR];
     for (size_t i = size() / LEAFS_MULTIPLICATIVE_FACTOR; i < size(); i++) {
-        if (!comp(last_element, *data[i])) last_element = *data[i];
+        if (!comp(*data[i], last_element)) last_element = *data[i];
     }
 
     return last_element;
