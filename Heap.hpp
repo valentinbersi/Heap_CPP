@@ -125,7 +125,7 @@ void Heap<T, comp>::downheap(size_t moved_index) {
 template<typename T, bool (*comp)(T, T)>
 Heap<T, comp>::Heap(const Heap<T, comp> &heap) {
     for (size_t i = 0; i < heap.size(); i++) {
-        data.emplace_back(*heap.data[i]);
+        data.push_back(new T(*heap.data[i]));
     }
 }
 
@@ -139,7 +139,7 @@ Heap<T, comp> &Heap<T, comp>::operator=(const Heap<T, comp> &heap) {
         data.clear();
 
         for (size_t i = 0; i < heap.size(); i++) {
-            data.emplace_back(*heap.data[i]);
+            data.push_back(new T(*heap.data[i]));
         }
     }
 
@@ -148,7 +148,7 @@ Heap<T, comp> &Heap<T, comp>::operator=(const Heap<T, comp> &heap) {
 
 template<typename T, bool (*comp)(T, T)>
 void Heap<T, comp>::add(T new_element) {
-    data.emplace_back(new_element);
+    data.push_back(new T(new_element));
 
     if (size() - 1 > FIRST_ELEMENT) {
         upheap(size() - 1, (size() - PARENT_ADDITIVE_FACTOR) / PARENT_MULTIPLICATIVE_FACTOR);
@@ -208,3 +208,4 @@ Heap<T, comp>::~Heap() {
 }
 
 #endif
+
